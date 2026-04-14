@@ -1,5 +1,5 @@
 services:
-  # 1. Static frontend (your intake form)
+  # 1. Static frontend (your beautiful intake form)
   - type: web
     name: fantasy-frontend
     runtime: static
@@ -23,10 +23,10 @@ services:
       - key: REDIS_URL
         fromService:
           name: fantasy-redis
-          type: keyvalue
+          type: redis
           property: connectionString
 
-  # 3. Celery worker (AI processing)
+  # 3. Celery worker (handles AI image generation)
   - type: worker
     name: fantasy-worker
     runtime: python
@@ -41,15 +41,15 @@ services:
       - key: REDIS_URL
         fromService:
           name: fantasy-redis
-          type: keyvalue
+          type: redis
           property: connectionString
 
-  # 4. Redis for queue
-  - type: keyvalue
+  # 4. Redis (for Celery queue)
+  - type: redis
     name: fantasy-redis
     plan: free
 
+databases:
   # 5. PostgreSQL database
-  - type: pgsql
-    name: fantasy-db
+  - name: fantasy-db
     plan: free
