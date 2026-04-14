@@ -1,5 +1,5 @@
 services:
-  # 1. Static frontend (your beautiful intake form)
+  # 1. Static frontend (your intake form)
   - type: web
     name: fantasy-frontend
     runtime: static
@@ -26,7 +26,7 @@ services:
           type: redis
           property: connectionString
 
-  # 3. Celery worker (handles AI image generation)
+  # 3. Celery worker (AI processing)
   - type: worker
     name: fantasy-worker
     runtime: python
@@ -48,6 +48,9 @@ services:
   - type: redis
     name: fantasy-redis
     plan: free
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: "Allow all internal services"
 
 databases:
   # 5. PostgreSQL database
