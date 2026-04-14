@@ -1,0 +1,55 @@
+services:
+  # 1. Static frontend (your intake form)
+  - type: web
+    name: fantasy-frontend
+    runtime: static
+    rootDir: .
+    staticPublishPath: frontend
+    autoDeploy: true
+
+  # 2. FastAPI backend
+  - type: web
+    name: fantasy-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fantasy-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: fantasy-redis
+          type: keyvalue
+          property: connectionString
+
+  # 3. Celery worker (AI processing)
+  - type: worker
+    name: fantasy-worker
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A worker.tasks worker --loglevel=info
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fantasy-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: fantasy-redis
+          type: keyvalue
+          property: connectionString
+
+  # 4. Redis for queue
+  - type: keyvalue
+    name: fantasy-redis
+    plan: free
+
+  # 5. PostgreSQL database
+  - type: pgsql
+    name: fantasy-db
+    plan: free
